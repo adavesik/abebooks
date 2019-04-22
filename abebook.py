@@ -12,7 +12,7 @@ prices = []
 
 
 def abebook_request(links):
-    for link in links[0:1000]:
+    for link in links:
         tmp_prices = []
         page = requests.get(link)
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -30,18 +30,20 @@ def build_link(csv_file):
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row['Book Title']:
-                links.append("https://www.abebooks.com/servlet/SearchResults?an="+row['Last Name'].strip()+" "+row['First Name'].strip()+"&bi=0&bx=off&cm_sp=SearchF-_-Advtab1-_-Results&ds=30&recentlyadded=all&sortby=20&sts=t&tn="+ row['Book Title']+"")
+                links.append("https://www.abebooks.com/servlet/SearchResults?an="+row['Last Name'].strip()+" "+row['First Name'].strip()+"&bi=s&bx=off&cm_sp=SearchF-_-Advtab1-_-Results&ds=30&recentlyadded=all&sortby=20&sts=t&tn="+ row['Book Title']+"")
             else:
-                links.append("https://www.abebooks.com/servlet/SearchResults?an="+row['Last Name'].strip()+" "+row['First Name'].strip()+"&bi=0&bx=off&cm_sp=SearchF-_-Advtab1-_-Results&ds=30&recentlyadded=all&sortby=20&sts=t&tn=" + row['Series Title/Book Title'] + "")
+                links.append("https://www.abebooks.com/servlet/SearchResults?an="+row['Last Name'].strip()+" "+row['First Name'].strip()+"&bi=s&bx=off&cm_sp=SearchF-_-Advtab1-_-Results&ds=30&recentlyadded=all&sortby=20&sts=t&tn=" + row['Series Title/Book Title'] + "")
 
     return links
 
 
+# 'albert.csv' - input file
+# 'albert_final.csv'  - genreted file
 def generate_csv():
     with open('albert.csv') as csvfile:
         reader = csv.DictReader(csvfile)
-        with open('albert_cp.csv', 'a', newline='') as csvfinal:
-            fieldnames = ['Box', 'Last Name', 'First Name', 'Series Title/Book Title', 'Series #', 'Book Title', 'Price 1', 'Price 2', 'Avg Price', 'Search Result']
+        with open('albert_final.csv', 'a', newline='') as csvfinal:
+            fieldnames = ['Box', 'Last Name', 'First Name', 'Series Title/Book Title', 'Series #', 'Book Title', 'Minimum Price', 'Maximum Price', 'Avg Price', 'Search Result']
             writer = csv.DictWriter(csvfinal, fieldnames=fieldnames)
             writer.writeheader()
             for row, value in zip(reader, prices):
@@ -52,36 +54,36 @@ def generate_csv():
                                      'Series Title/Book Title': row['Series Title/Book Title'],
                                      'Series #': row['Series #'],
                                      'Book Title': row['Book Title'],
-                                     'Price 1': '',
-                                     'Price 2': '',
+                                     'Minimum Price': '',
+                                     'Maximum Price': '',
                                      'Avg Price': '',
                                      'Search Result': 'No Result'})
                     print("Wrote: "+row['Last Name']+" book "+ row['Book Title'])
 
                 elif len(value) >= 2:
-                    price1 = value[0]
-                    price2 = value[1]
+                    price1 = min(value)
+                    price2 = max(value)
                     writer.writerow({'Box': row['Box'],
                                      'Last Name': row['Last Name'],
                                      'First Name': row['First Name'],
                                      'Series Title/Book Title': row['Series Title/Book Title'],
                                      'Series #': row['Series #'],
                                      'Book Title': row['Book Title'],
-                                     'Price 1': price1,
-                                     'Price 2': price2,
+                                     'Minimum Price': price1,
+                                     'Maximum Price': price2,
                                      'Avg Price': price_average(value)})
                     print("Wrote: " + row['Last Name'] + " book " + row['Book Title'])
                 else:
-                    price1 = value[0]
-                    price2 = ''
+                    price1 = min(value)
+                    price2 = max(value)
                     writer.writerow({'Box': row['Box'],
                                      'Last Name': row['Last Name'],
                                      'First Name': row['First Name'],
                                      'Series Title/Book Title': row['Series Title/Book Title'],
                                      'Series #': row['Series #'],
                                      'Book Title': row['Book Title'],
-                                     'Price 1': price1,
-                                     'Price 2': price2,
+                                     'Minimum Price': price1,
+                                     'Maximum Price': price2,
                                      'Avg Price': price_average(value)})
                     print("Wrote: " + row['Last Name'] + " book " + row['Book Title'])
 
@@ -97,7 +99,7 @@ Returns the average price of the given book
 
     return sum(lst) / len(lst)
 
-build_link("albert.csv")
+build_link("albert.csv") # input CVS file
 abebook_request(links)
 generate_csv()
 
@@ -106,4 +108,3 @@ generate_csv()
 #     print(link)
 
 #print(prices)
-
