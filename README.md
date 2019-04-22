@@ -15,4 +15,5 @@ def generate_csv():
         reader = csv.DictReader(csvfile)
 with open('albert_final.csv', 'a', newline='') as csvfinal:
 ``
+
 albert_final.csv - generated file. Script will create that if there is no
