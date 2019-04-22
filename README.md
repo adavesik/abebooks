@@ -8,7 +8,7 @@ Inputed CSV file should be located in the same directory as script. In this exam
 build_link("albert.csv") # input CVS file
 ``
 
-In generate_csv() function
+<strong>In generate_csv() function</strong>
 
 
 ``
